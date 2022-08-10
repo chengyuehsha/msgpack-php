@@ -6,8 +6,8 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
-    public static function hello(): string
+    public static function nil($val): int
     {
-        return 'world';
+        return 0xC0;
     }
 }
