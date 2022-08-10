@@ -1,0 +1,15 @@
+{
+    "name": "chengyueh/msgpack",
+    "autoload": {
+        "psr-4": {
+            "Chengyueh\\Msgpack\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "chengyuehsha",
+            "email": "chengyueh.sha@gmail.com"
+        }
+    ],
+    "require": {}
+}
