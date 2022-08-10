@@ -2,7 +2,7 @@
     "name": "chengyueh/msgpack",
     "autoload": {
         "psr-4": {
-            "Chengyueh\\Msgpack\\": "src/"
+            "Chengyueh\\MsgPack\\": "src/"
         }
     },
     "authors": [
