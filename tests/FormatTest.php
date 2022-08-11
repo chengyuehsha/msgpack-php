@@ -8,6 +8,30 @@ use Symfony\Component\Yaml\Yaml;
 
 class FormatTest extends TestCase
 {
+    public function testInt(): void
+    {
+        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/20.number-positive.yaml');
+        foreach ($cases as $case) {
+            $input = $case['number'];
+            $expect = $case['msgpack'][0];
+
+            $result = $this->convertByteArrayToHexString(Packer::int($input));
+            $this->assertEquals($expect, $result);
+        }
+    }
+
+    private function convertByteArrayToHexString(array $bytes, $separate = '-'): string
+    {
+        array_walk($bytes, function (&$byte) {
+            $byte = is_int($byte) ? dechex($byte) : $byte;
+            if (strlen($byte) <= 1) {
+                $byte = '0' . $byte;
+            }
+        });
+
+        return implode($separate, $bytes);
+    }
+
     public function testBool(): void
     {
         $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/11.bool.yaml');
