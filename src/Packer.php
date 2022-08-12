@@ -6,6 +6,19 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
+    public static function binary(string $val): array
+    {
+        $strArray = ('' === $val) ? [] : explode('-', $val);
+
+        $byteArray = array_map(function ($str) {
+            return hexdec($str);
+        }, $strArray);
+
+        return [
+            0xC4, count($byteArray), ...$byteArray,
+        ];
+    }
+
     public static function float(float $val): array
     {
         return [

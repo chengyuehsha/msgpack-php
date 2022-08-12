@@ -17,7 +17,6 @@ class FormatTest extends TestCase
 
             $result = $this->convertByteArrayToHexString(Packer::float($input));
             $this->assertEquals($expect, $result);
-            var_dump($result);
         }
     }
 
@@ -52,6 +51,18 @@ class FormatTest extends TestCase
         });
 
         return implode($separate, $bytes);
+    }
+
+    public function testBinary(): void
+    {
+        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/12.binary.yaml');
+        foreach ($cases as $case) {
+            $input = $case['binary'];
+            $expect = $case['msgpack'][0];
+
+            $result = $this->convertByteArrayToHexString(Packer::binary($input));
+            $this->assertEquals($expect, $result);
+        }
     }
 
     public function testBool(): void
