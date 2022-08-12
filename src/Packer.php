@@ -6,6 +6,14 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
+    public static function float(float $val): array
+    {
+        return [
+            0xCA,
+            ...str_split(bin2hex(pack('G', $val)), 2),
+        ];
+    }
+
     public static function int(int $val): array
     {
         // 7-bit positive integer

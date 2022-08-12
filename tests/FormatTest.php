@@ -8,6 +8,19 @@ use Symfony\Component\Yaml\Yaml;
 
 class FormatTest extends TestCase
 {
+    public function testFloat(): void
+    {
+        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/22.number-float.yaml');
+        foreach ($cases as $case) {
+            $input = $case['number'];
+            $expect = $case['msgpack'][0];
+
+            $result = $this->convertByteArrayToHexString(Packer::float($input));
+            $this->assertEquals($expect, $result);
+            var_dump($result);
+        }
+    }
+
     public function testInt(): void
     {
         $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/20.number-positive.yaml');
