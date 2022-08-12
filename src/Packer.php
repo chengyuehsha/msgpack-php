@@ -31,6 +31,35 @@ class Packer
             return [0xCE, ...$result];
         }
 
+        // 5-bit negative integer
+        if ($val >= -32) {
+            return [
+                bin2hex(pack('c', 0xE0 | $val)),
+            ];
+        }
+
+        // 8-bit signed
+        if ($val >= -128) {
+            return [
+                0xD0,
+                bin2hex(pack('c', $val)),
+            ];
+        }
+
+        if ($val >= (-128 << 8)) {
+            return [
+                0xD1,
+                ...str_split(bin2hex(pack('n', $val)), 2),
+            ];
+        }
+
+        if ($val >= (-128 << 24)) {
+            return [
+                0xD2,
+                ...str_split(bin2hex(pack('N', $val)), 2),
+            ];
+        }
+
         return [];
     }
 

@@ -18,6 +18,15 @@ class FormatTest extends TestCase
             $result = $this->convertByteArrayToHexString(Packer::int($input));
             $this->assertEquals($expect, $result);
         }
+
+        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/21.number-negative.yaml');
+        foreach ($cases as $case) {
+            $input = $case['number'];
+            $expect = $case['msgpack'][0];
+
+            $result = $this->convertByteArrayToHexString(Packer::int($input));
+            $this->assertEquals($expect, $result);
+        }
     }
 
     private function convertByteArrayToHexString(array $bytes, $separate = '-'): string
