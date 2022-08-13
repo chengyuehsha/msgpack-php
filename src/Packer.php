@@ -40,7 +40,7 @@ class Packer
                 return [
                     0xD6,
                     $extType,
-                    ...str_split(bin2hex(pack('N', $ts)), 2),
+                    ...self::packToHexArray($ts, 32),
                 ];
             }
 
@@ -48,7 +48,7 @@ class Packer
                 return [
                     0xD7,
                     $extType,
-                    ...str_split(bin2hex(pack('J', $nanoTs << 34 | $ts)), 2),
+                    ...self::packToHexArray($nanoTs << 34 | $ts, 64),
                 ];
             }
         }
@@ -57,9 +57,30 @@ class Packer
             0xC7,
             bin2hex(pack('c', 12)),
             $extType,
-            ...str_split(bin2hex(pack('N', $nanoTs)), 2),
-            ...str_split(bin2hex(pack('J', $ts)), 2),
+            ...self::packToHexArray($nanoTs, 32),
+            ...self::packToHexArray($ts, 64),
         ];
+    }
+
+    // TODO 這裡回傳是 hex of str 應該要再統一成 hex
+    private static function packToHexArray($val, $bit): array
+    {
+        switch ($bit) {
+            case 64:
+                $code = 'J';
+                break;
+            case 32:
+                $code = 'N';
+                break;
+            case 16:
+            default:
+                $code = 'n';
+        }
+
+        $pack = pack($code, $val);
+        $hexStr = bin2hex($pack);
+
+        return str_split($hexStr, 2);
     }
 
     public static function packMap(\stdClass $data): array
@@ -101,14 +122,14 @@ class Packer
         if ($length <= 0xFFFF) {
             return [
                 0xDC,
-                ...str_split(bin2hex(pack('n', $length)), 2),
+                ...self::packToHexArray($length, 16),
                 ...$contents,
             ];
         }
 
         return [
             0xDD,
-            ...str_split(bin2hex(pack('N', $length)), 2),
+            ...self::packToHexArray($length, 32),
             ...$contents,
         ];
     }
@@ -197,14 +218,13 @@ class Packer
         }
 
         if ($val >= 0 && $val <= 0xFFFF) {
-            // TODO 這裡回傳是 str 應該要統一成 int
-            $result = str_split(bin2hex(pack('n', $val)), 2);
+            $result = self::packToHexArray($val, 16);
 
             return [0xCD, ...$result];
         }
 
         if ($val >= 0 && $val <= 0xFFFFFFFF) {
-            $result = str_split(bin2hex(pack('N', $val)), 2);
+            $result = self::packToHexArray($val, 32);
 
             return [0xCE, ...$result];
         }
@@ -227,14 +247,14 @@ class Packer
         if ($val >= (-128 << 8)) {
             return [
                 0xD1,
-                ...str_split(bin2hex(pack('n', $val)), 2),
+                ...self::packToHexArray($val, 16),
             ];
         }
 
         if ($val >= (-128 << 24)) {
             return [
                 0xD2,
-                ...str_split(bin2hex(pack('N', $val)), 2),
+                ...self::packToHexArray($val, 32),
             ];
         }
 
