@@ -6,6 +6,44 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
+    public static function packArray(array $val): array
+    {
+        $length = count($val);
+
+        // 用 recursive 處理？不然沒完沒了..
+        $contents = [];
+        foreach ($val as $v) {
+            if (is_integer($v)) {
+                $contents[] = $v;
+                continue;
+            }
+
+            array_push($contents, ...self::str($v));
+        }
+
+        // 4-bit
+        if ($length <= 0xF) {
+            return [
+                0x90 | $length,
+                ...$contents,
+            ];
+        }
+
+        if ($length <= 0xFFFF) {
+            return [
+                0xDC,
+                ...str_split(bin2hex(pack('n', $length)), 2),
+                ...$contents,
+            ];
+        }
+
+        return [
+            0xDD,
+            ...str_split(bin2hex(pack('N', $length)), 2),
+            ...$contents,
+        ];
+    }
+
     public static function str(string $val): array
     {
         $length = strlen($val);
