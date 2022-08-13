@@ -6,6 +6,56 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
+    public static function str(string $val): array
+    {
+        $length = strlen($val);
+
+        // 5-bit
+        if ($length <= 0x1F) {
+            return [
+                0xA0 | $length,
+                ...self::strToByteArray($val),
+            ];
+        }
+
+        if ($length <= 0xFF) {
+            return [
+                dechex(0xD9),
+                dechex($length),
+                ...self::strToByteArray($val),
+            ];
+        }
+
+        if ($length <= 0xFFFF) {
+            return [
+                dechex(0xDA),
+                dechex($length),
+                ...self::strToByteArray($val),
+            ];
+        }
+
+        if ($length <= 0xFFFFFFFF) {
+            return [
+                dechex(0xDB),
+                dechex($length),
+                ...self::strToByteArray($val),
+            ];
+        }
+    }
+
+    private static function strToByteArray(string $str): array
+    {
+        if (0 === strlen($str)) {
+            return [];
+        }
+
+        foreach (str_split($str) as $chr) {
+            $result[] = ord($chr);
+        }
+
+        return $result;
+    }
+
     public static function binary(string $val): array
     {
         $strArray = ('' === $val) ? [] : explode('-', $val);
