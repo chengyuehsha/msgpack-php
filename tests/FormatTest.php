@@ -8,12 +8,14 @@ use Symfony\Component\Yaml\Yaml;
 
 class FormatTest extends TestCase
 {
+    private $testSuitPath = __DIR__ . '/../msgpack-test-suite/src';
+
     public function testString(): void
     {
         $cases = [
-            ...Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/30.string-ascii.yaml'),
-            ...Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/31.string-utf8.yaml'),
-            ...Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/32.string-emoji.yaml'),
+            ...Yaml::parseFile($this->testSuitPath . '/30.string-ascii.yaml'),
+            ...Yaml::parseFile($this->testSuitPath . '/31.string-utf8.yaml'),
+            ...Yaml::parseFile($this->testSuitPath . '/32.string-emoji.yaml'),
         ];
 
         foreach ($cases as $case) {
@@ -27,7 +29,7 @@ class FormatTest extends TestCase
 
     public function testFloat(): void
     {
-        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/22.number-float.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/22.number-float.yaml');
         foreach ($cases as $case) {
             $input = $case['number'];
             $expect = $case['msgpack'][0];
@@ -39,7 +41,7 @@ class FormatTest extends TestCase
 
     public function testInt(): void
     {
-        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/20.number-positive.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/20.number-positive.yaml');
         foreach ($cases as $case) {
             $input = $case['number'];
             $expect = $case['msgpack'][0];
@@ -48,7 +50,7 @@ class FormatTest extends TestCase
             $this->assertEquals($expect, $result);
         }
 
-        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/21.number-negative.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/21.number-negative.yaml');
         foreach ($cases as $case) {
             $input = $case['number'];
             $expect = $case['msgpack'][0];
@@ -72,7 +74,7 @@ class FormatTest extends TestCase
 
     public function testBinary(): void
     {
-        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/12.binary.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/12.binary.yaml');
         foreach ($cases as $case) {
             $input = $case['binary'];
             $expect = $case['msgpack'][0];
@@ -84,7 +86,7 @@ class FormatTest extends TestCase
 
     public function testBool(): void
     {
-        $cases = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/11.bool.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/11.bool.yaml');
         foreach ($cases as $case) {
             $input = $case['bool'];
             $expect = $case['msgpack'][0];
@@ -95,7 +97,7 @@ class FormatTest extends TestCase
 
     public function testNull(): void
     {
-        $case = Yaml::parseFile(__DIR__ . '/../msgpack-test-suite/src/10.nil.yaml');
+        $cases = Yaml::parseFile($this->testSuitPath . '/10.nil.yaml');
         $input = $case[0]['nil'];
         $expect = $case[0]['msgpack'][0];
 
