@@ -10,6 +10,18 @@ class FormatTest extends TestCase
 {
     private $testSuitPath = __DIR__ . '/../msgpack-test-suite/src';
 
+    public function testMap(): void
+    {
+        $cases = Yaml::parseFile($this->testSuitPath . '/41.map.yaml');
+        foreach ($cases as $case) {
+            $input = $case['map'];
+            $expect = $case['msgpack'][0];
+
+            $result = $this->convertByteArrayToHexString(Packer::packMap($input));
+            $this->assertEquals($expect, $result);
+        }
+    }
+
     public function testArray(): void
     {
         $cases = Yaml::parseFile($this->testSuitPath . '/40.array.yaml');

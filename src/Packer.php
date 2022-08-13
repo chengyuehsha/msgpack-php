@@ -6,6 +6,32 @@ namespace Chengyueh\MsgPack;
 
 class Packer
 {
+    public static function pack($data): array
+    {
+        if (is_string($data)) {
+            return self::str($data);
+        }
+
+        if (is_integer($data)) {
+            return self::int($data);
+        }
+
+        return [];
+    }
+
+    public static function packMap(array $data): array
+    {
+        $length = count($data);
+        $result = [0x80 | $length];
+
+        foreach ($data as $key => $value) {
+            array_push($result, ...self::pack($key));
+            array_push($result, ...self::pack($value));
+        }
+
+        return $result;
+    }
+
     public static function packArray(array $val): array
     {
         $length = count($val);
