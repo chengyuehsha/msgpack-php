@@ -27,6 +27,41 @@ class Packer
         return [];
     }
 
+    public static function packTimestamp($data): array
+    {
+        $ts = $data[0];
+        $nanoTs = $data[1];
+
+        // Timestamp is assigned to type -1
+        $extType = bin2hex(pack('c', -1));
+
+        if ($ts >= 0) {
+            if ($nanoTs <= 0 && $ts <= 2 ** 32 - 1) {
+                return [
+                    0xD6,
+                    $extType,
+                    ...str_split(bin2hex(pack('N', $ts)), 2),
+                ];
+            }
+
+            if ($ts <= 2 ** 34 - 1) {
+                return [
+                    0xD7,
+                    $extType,
+                    ...str_split(bin2hex(pack('J', $nanoTs << 34 | $ts)), 2),
+                ];
+            }
+        }
+
+        return [
+            0xC7,
+            bin2hex(pack('c', 12)),
+            $extType,
+            ...str_split(bin2hex(pack('N', $nanoTs)), 2),
+            ...str_split(bin2hex(pack('J', $ts)), 2),
+        ];
+    }
+
     public static function packMap(\stdClass $data): array
     {
         $length = count((array) $data);
