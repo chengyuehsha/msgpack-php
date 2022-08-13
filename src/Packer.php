@@ -16,12 +16,20 @@ class Packer
             return self::int($data);
         }
 
+        if (is_array($data)) {
+            return self::packArray($data);
+        }
+
+        if (is_object($data)) {
+            return self::packMap($data);
+        }
+
         return [];
     }
 
-    public static function packMap(array $data): array
+    public static function packMap(\stdClass $data): array
     {
-        $length = count($data);
+        $length = count((array) $data);
         $result = [0x80 | $length];
 
         foreach ($data as $key => $value) {
@@ -44,7 +52,7 @@ class Packer
                 continue;
             }
 
-            array_push($contents, ...self::str($v));
+            array_push($contents, ...self::pack($v));
         }
 
         // 4-bit
