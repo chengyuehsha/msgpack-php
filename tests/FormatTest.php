@@ -30,111 +30,10 @@ class FormatTest extends TestCase
             $input = $case['timestamp'];
             $expect = $case['msgpack'][0];
 
-            $result = $this->convertByteArrayToHexString(Packer::packTimestamp($input));
+            $result = Packer::packTimestamp($input);
+            $result = $this->convertByteArrayToHexString($result);
             $this->assertEquals($expect, $result, json_encode($input));
         }
-    }
-
-    public function testNest(): void
-    {
-        $cases = Yaml::parseFile($this->testSuitPath . '/42.nested.yaml',
-            Yaml::PARSE_OBJECT_FOR_MAP);
-
-        foreach ($cases as $case) {
-            $input = $case->map ?? $case->array;
-            $expect = $case->msgpack[0];
-
-            $result = $this->convertByteArrayToHexString(Packer::pack($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    public function testMap(): void
-    {
-        $cases = Yaml::parseFile($this->testSuitPath . '/41.map.yaml',
-            Yaml::PARSE_OBJECT_FOR_MAP);
-
-        foreach ($cases as $case) {
-            $input = $case->map;
-            $expect = $case->msgpack[0];
-
-            $result = $this->convertByteArrayToHexString(Packer::packMap($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    public function testArray(): void
-    {
-        $cases = Yaml::parseFile($this->testSuitPath . '/40.array.yaml');
-        foreach ($cases as $case) {
-            $input = $case['array'];
-            $expect = $case['msgpack'][0];
-
-            $result = $this->convertByteArrayToHexString(Packer::packArray($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    public function testString(): void
-    {
-        $cases = [
-            ...Yaml::parseFile($this->testSuitPath . '/30.string-ascii.yaml'),
-            ...Yaml::parseFile($this->testSuitPath . '/31.string-utf8.yaml'),
-            ...Yaml::parseFile($this->testSuitPath . '/32.string-emoji.yaml'),
-        ];
-
-        foreach ($cases as $case) {
-            $input = $case['string'];
-            $expect = $case['msgpack'][0];
-
-            $result = $this->convertByteArrayToHexString(Packer::str($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    public function testFloat(): void
-    {
-        $cases = Yaml::parseFile($this->testSuitPath . '/22.number-float.yaml');
-        foreach ($cases as $case) {
-            $input = $case['number'];
-            $expect = $case['msgpack'][0];
-
-            $result = $this->convertByteArrayToHexString(Packer::float($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    public function testInt(): void
-    {
-        $cases = Yaml::parseFile($this->testSuitPath . '/20.number-positive.yaml');
-        foreach ($cases as $case) {
-            $input = $case['number'];
-            $expect = $case['msgpack'][0];
-
-            $result = $this->convertByteArrayToHexString(Packer::int($input));
-            $this->assertEquals($expect, $result);
-        }
-
-        $cases = Yaml::parseFile($this->testSuitPath . '/21.number-negative.yaml');
-        foreach ($cases as $case) {
-            $input = $case['number'];
-            $expect = $case['msgpack'][0];
-
-            $result = $this->convertByteArrayToHexString(Packer::int($input));
-            $this->assertEquals($expect, $result);
-        }
-    }
-
-    private function convertByteArrayToHexString(array $bytes, $separate = '-'): string
-    {
-        array_walk($bytes, function (&$byte) {
-            $byte = is_int($byte) ? dechex($byte) : $byte;
-            if (strlen($byte) <= 1) {
-                $byte = '0' . $byte;
-            }
-        });
-
-        return implode($separate, $bytes);
     }
 
     public function testBinary(): void
@@ -149,23 +48,73 @@ class FormatTest extends TestCase
         }
     }
 
-    public function testBool(): void
+    /**
+     * @dataProvider providePack
+     */
+    public function testPack($type, $input, $expect): void
     {
-        $cases = Yaml::parseFile($this->testSuitPath . '/11.bool.yaml');
-        foreach ($cases as $case) {
-            $input = $case['bool'];
-            $expect = $case['msgpack'][0];
+        $result = Packer::pack($input);
+        $result = $this->convertByteArrayToHexString($result);
+        $this->assertEquals($expect, $result);
+    }
 
-            $this->assertEquals($expect, dechex(Packer::bool($input)));
+    public function providePack(): Generator
+    {
+        $testSuitsMap = [
+            'nil' => [
+                '/10.nil.yaml',
+            ],
+            'bool' => [
+                '/11.bool.yaml',
+            ],
+            'number' => [
+                '/20.number-positive.yaml',
+                '/21.number-negative.yaml',
+                '/22.number-float.yaml',
+            ],
+            'string' => [
+                '/30.string-ascii.yaml',
+                '/31.string-utf8.yaml',
+                '/32.string-emoji.yaml',
+            ],
+            'array' => [
+                '/40.array.yaml',
+            ],
+            'map' => [
+                '/41.map.yaml',
+            ],
+            'nested' => [
+                '/42.nested.yaml',
+            ],
+        ];
+
+        foreach ($testSuitsMap as $type => $files) {
+            foreach ($files as $fileName) {
+                // 加上 PARSE_OBJECT_FOR_MAP 為了要正確判斷 array 或 map
+                $file = $this->testSuitPath . $fileName;
+                $cases = Yaml::parseFile($file, Yaml::PARSE_OBJECT_FOR_MAP);
+
+                foreach ($cases as $case) {
+                    $expect = $case->msgpack[0];
+
+                    // workaround, 因為 nested type 裡面會有 map or array 兩種
+                    $input = $case->$type ?? $case->map ?? $case->array;
+
+                    yield [$type, $input, $expect];
+                }
+            }
         }
     }
 
-    public function testNull(): void
+    private function convertByteArrayToHexString(array $bytes, $separate = '-'): string
     {
-        $case = Yaml::parseFile($this->testSuitPath . '/10.nil.yaml');
-        $input = $case[0]['nil'];
-        $expect = $case[0]['msgpack'][0];
+        array_walk($bytes, function (&$byte) {
+            $byte = is_int($byte) ? dechex($byte) : $byte;
+            if (strlen($byte) <= 1) {
+                $byte = '0' . $byte;
+            }
+        });
 
-        $this->assertEquals($expect, dechex(Packer::nil($case[0]['nil'])));
+        return implode($separate, $bytes);
     }
 }

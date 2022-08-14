@@ -12,6 +12,10 @@ class Packer
             return self::str($data);
         }
 
+        if (is_float($data)) {
+            return self::packFloat($data);
+        }
+
         if (is_integer($data)) {
             return self::int($data);
         }
@@ -22,6 +26,14 @@ class Packer
 
         if (is_object($data)) {
             return self::packMap($data);
+        }
+
+        if (is_bool($data)) {
+            return self::bool($data);
+        }
+
+        if (is_null($data)) {
+            return self::nil();
         }
 
         return [];
@@ -235,7 +247,7 @@ class Packer
         ];
     }
 
-    public static function float(float $val): array
+    public static function packFloat(float $val): array
     {
         return [
             0xCA,
@@ -299,13 +311,13 @@ class Packer
         return [];
     }
 
-    public static function bool(bool $val): int
+    public static function bool(bool $val): array
     {
-        return ($val) ? 0xC3 : 0xC2;
+        return ($val) ? [0xC3] : [0xC2];
     }
 
-    public static function nil($val): int
+    public static function nil(): array
     {
-        return 0xC0;
+        return [0xC0];
     }
 }
