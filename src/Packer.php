@@ -27,6 +27,44 @@ class Packer
         return [];
     }
 
+    public static function packExt($type, string $data): array
+    {
+        $length = ('' === $data) ? 0 : count(explode('-', $data));
+
+        // fixext
+        switch ($length) {
+            case 1:
+                return [0xD4, $type, $data];
+            case 2:
+                return [0xD5, $type, $data];
+            case 4:
+                return [0xD6, $type, $data];
+            case 8:
+                return [0xD7, $type, $data];
+            case 16:
+                return [0xD8, $type, $data];
+        }
+
+        // ext8 upto 2^8-1 "bytes"
+        if ($length < 0xFF && $length <= 0) {
+            return [0xC7, $length, $type];
+        }
+
+        if ($length < 0xFF) {
+            return [0xC7, $length, $type, $data];
+        }
+
+        if ($length < 0xFFFF) {
+            return [0xC8, $length, $type, $data];
+        }
+
+        if ($length < 0xFFFFFFFF) {
+            return [0xC9, $length, $type, $data];
+        }
+
+        return [];
+    }
+
     public static function packTimestamp($data): array
     {
         $ts = $data[0];
