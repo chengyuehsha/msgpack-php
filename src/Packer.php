@@ -150,14 +150,8 @@ class Packer
     {
         $length = count($val);
 
-        // 用 recursive 處理？不然沒完沒了..
         $contents = [];
         foreach ($val as $v) {
-            if (is_integer($v)) {
-                $contents[] = $v;
-                continue;
-            }
-
             array_push($contents, ...self::pack($v));
         }
 
