@@ -53,7 +53,8 @@ class FormatTest extends TestCase
             $input = $case['binary'];
             $expect = $case['msgpack'][0];
 
-            $result = $this->convertByteArrayToHexString(Packer::binary($input));
+            $result = Packer::packBinary($input);
+            $result = $this->convertByteArrayToHexString($result);
             $this->assertEquals($expect, $result);
         }
     }

@@ -9,7 +9,7 @@ class Packer
     public static function pack($data): array
     {
         if (is_string($data)) {
-            return self::str($data);
+            return self::packString($data);
         }
 
         if (is_float($data)) {
@@ -17,7 +17,7 @@ class Packer
         }
 
         if (is_integer($data)) {
-            return self::int($data);
+            return self::packInteger($data);
         }
 
         if (is_array($data)) {
@@ -29,11 +29,11 @@ class Packer
         }
 
         if (is_bool($data)) {
-            return self::bool($data);
+            return self::packBool($data);
         }
 
         if (is_null($data)) {
-            return self::nil();
+            return self::packNull();
         }
 
         return [];
@@ -178,7 +178,7 @@ class Packer
         ];
     }
 
-    public static function str(string $val): array
+    public static function packString(string $val): array
     {
         $length = strlen($val);
 
@@ -228,7 +228,7 @@ class Packer
         return $result;
     }
 
-    public static function binary(string $val): array
+    public static function packBinary(string $val): array
     {
         $strArray = ('' === $val) ? [] : explode('-', $val);
 
@@ -249,7 +249,7 @@ class Packer
         ];
     }
 
-    public static function int(int $val): array
+    public static function packInteger(int $val): array
     {
         // 7-bit positive integer
         if ($val >= 0 && $val <= 127) {
@@ -305,12 +305,12 @@ class Packer
         return [];
     }
 
-    public static function bool(bool $val): array
+    public static function packBool(bool $val): array
     {
         return ($val) ? [0xC3] : [0xC2];
     }
 
-    public static function nil(): array
+    public static function packNull(): array
     {
         return [0xC0];
     }
