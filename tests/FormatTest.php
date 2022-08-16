@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Chengyueh\MsgPack\Converter;
 use Chengyueh\MsgPack\Packer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
@@ -16,7 +17,7 @@ class FormatTest extends TestCase
         $expect = '82 a7 63 6f 6d 70 61 63 74 c3 a6 73 63 68 65 6d 61 00';
 
         $result = Packer::pack($input);
-        $result = $this->convertByteArrayToHexString($result, ' ');
+        $result = Converter::byteArrayToHexArray($result, ' ');
         $this->assertEquals($expect, $result);
     }
 
@@ -28,7 +29,7 @@ class FormatTest extends TestCase
             $expect = $case['msgpack'][0];
 
             $result = Packer::packExt($input[0], $input[1]);
-            $result = $this->convertByteArrayToHexString($result);
+            $result = Converter::byteArrayToHexArray($result);
             $this->assertEquals($expect, $result, json_encode($input));
         }
     }
@@ -41,7 +42,7 @@ class FormatTest extends TestCase
             $expect = $case['msgpack'][0];
 
             $result = Packer::packTimestamp($input);
-            $result = $this->convertByteArrayToHexString($result);
+            $result = Converter::byteArrayToHexArray($result);
             $this->assertEquals($expect, $result, json_encode($input));
         }
     }
@@ -54,7 +55,7 @@ class FormatTest extends TestCase
             $expect = $case['msgpack'][0];
 
             $result = Packer::packBinary($input);
-            $result = $this->convertByteArrayToHexString($result);
+            $result = Converter::byteArrayToHexArray($result);
             $this->assertEquals($expect, $result);
         }
     }
@@ -65,7 +66,7 @@ class FormatTest extends TestCase
     public function testPack($type, $input, $expect): void
     {
         $result = Packer::pack($input);
-        $result = $this->convertByteArrayToHexString($result);
+        $result = Converter::byteArrayToHexArray($result);
         $this->assertEquals($expect, $result);
     }
 
@@ -115,17 +116,5 @@ class FormatTest extends TestCase
                 }
             }
         }
-    }
-
-    private function convertByteArrayToHexString(array $bytes, $separate = '-'): string
-    {
-        array_walk($bytes, function (&$byte) {
-            $byte = is_int($byte) ? dechex($byte) : $byte;
-            if (strlen($byte) <= 1) {
-                $byte = '0' . $byte;
-            }
-        });
-
-        return implode($separate, $bytes);
     }
 }
